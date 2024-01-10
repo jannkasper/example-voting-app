@@ -12,7 +12,7 @@ var express = require('express'),
 
 io.set('transports', ['polling']);
 
-var port = process.env.PORT || 4000;
+var port = process.env.PORT || 3000;
 
 io.sockets.on('connection', function (socket) {
 
@@ -23,16 +23,27 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
-var pool = new pg.Pool({
-  connectionString: 'postgres://postgres:postgres@db/postgres'
-});
+var dbConfig = {
+  user: 'postgres',
+  password: 'Password123!',
+  host: 'db-jankasper.postgres.database.azure.com',
+  database: 'postgres',
+  port: 5432,
+  max: 5,   // set max to 200 connections to the db
+  //min: 200, // min is not a configuration option
+  idleTimeoutMillis: 0,
+  connectionTimeoutMillis: 10000,
+  ssl: true
+}
+
+var pool = new pg.Pool(dbConfig);
 
 async.retry(
-  {times: 1000, interval: 1000},
+  {times: 10000, interval: 10000},
   function(callback) {
     pool.connect(function(err, client, done) {
       if (err) {
-        console.error("Waiting for db");
+        console.error("Waiting for db: ", err);
       }
       callback(err, client);
     });
