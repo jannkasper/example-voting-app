@@ -24,9 +24,9 @@ io.sockets.on('connection', function (socket) {
 });
 
 var dbConfig = {
-  user: 'postgres',
+  user: 'user',
   password: 'Password123!',
-  host: 'db-jankasper.postgres.database.azure.com',
+  host: 'vote-db.postgres.database.azure.com',
   database: 'postgres',
   port: 5432,
   max: 5,   // set max to 200 connections to the db
