@@ -12,12 +12,14 @@ namespace Worker
 {
     public class Program
     {
+        public static string dbConnection = "Server=vote-db.postgres.database.azure.com;Database=postgres;Port=5432;User Id=user;Password=Password123!;Ssl Mode=Require;";
+        public static string redisConnection = "vote-redis-jan.redis.cache.windows.net:6380,password=FfWoGGYxaULbziUMg9GQLYFdFZiqOTii5AzCaCCPapY=,ssl=True,abortConnect=False";
         public static int Main(string[] args)
         {
             try
             {
-                var pgsql = OpenDbConnection("Server=db;Username=postgres;Password=postgres;");
-                var redisConn = OpenRedisConnection("redis");
+                var pgsql = OpenDbConnection(dbConnection);
+                var redisConn = OpenRedisConnection(redisConnection);
                 var redis = redisConn.GetDatabase();
 
                 // Keep alive is not implemented in Npgsql yet. This workaround was recommended:
@@ -34,7 +36,7 @@ namespace Worker
                     // Reconnect redis if down
                     if (redisConn == null || !redisConn.IsConnected) {
                         Console.WriteLine("Reconnecting Redis");
-                        redisConn = OpenRedisConnection("redis");
+                        redisConn = OpenRedisConnection(redisConnection);
                         redis = redisConn.GetDatabase();
                     }
                     string json = redis.ListLeftPopAsync("votes").Result;
@@ -46,7 +48,8 @@ namespace Worker
                         if (!pgsql.State.Equals(System.Data.ConnectionState.Open))
                         {
                             Console.WriteLine("Reconnecting DB");
-                            pgsql = OpenDbConnection("Server=db;Username=postgres;Password=postgres;");
+
+                            pgsql = OpenDbConnection(dbConnection);
                         }
                         else
                         { // Normal +1 vote requested
@@ -105,15 +108,15 @@ namespace Worker
         private static ConnectionMultiplexer OpenRedisConnection(string hostname)
         {
             // Use IP address to workaround https://github.com/StackExchange/StackExchange.Redis/issues/410
-            var ipAddress = GetIp(hostname);
-            Console.WriteLine($"Found redis at {ipAddress}");
+//            var ipAddress = GetIp(hostname);
+//            Console.WriteLine($"Found redis at {ipAddress}");
 
             while (true)
             {
                 try
                 {
                     Console.Error.WriteLine("Connecting to redis");
-                    return ConnectionMultiplexer.Connect(ipAddress);
+                    return ConnectionMultiplexer.Connect(hostname);
                 }
                 catch (RedisConnectionException)
                 {
