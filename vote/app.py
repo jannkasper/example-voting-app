@@ -18,7 +18,7 @@ app.logger.setLevel(logging.INFO)
 
 def get_redis():
     if not hasattr(g, 'redis'):
-        g.redis = Redis(host="redis", db=0, socket_timeout=5)
+        g.redis = Redis(host="redis-jankapser.redis.cache.windows.net", port=6379, db=0, password='kBYKqGYyg1Kdw3lRDFPrAMvhwFTv9s7StAzCaKmlPPQ=', socket_timeout=20)
     return g.redis
 
 @app.route("/", methods=['POST','GET'])
