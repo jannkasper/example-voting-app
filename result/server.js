@@ -24,11 +24,11 @@ io.sockets.on('connection', function (socket) {
 });
 
 var dbConfig = {
-  user: 'user',
-  password: 'Password123!',
-  host: 'vote-db.postgres.database.azure.com',
-  database: 'postgres',
-  port: 5432,
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_DATABASE || 'postgres',
+  port: process.env.DB_PORT || 5432,
   max: 5,   // set max to 200 connections to the db
   //min: 200, // min is not a configuration option
   idleTimeoutMillis: 0,
@@ -41,6 +41,7 @@ var pool = new pg.Pool(dbConfig);
 async.retry(
   {times: 10000, interval: 10000},
   function(callback) {
+    console.error("Connecting to db: ", JSON.stringify(dbConfig));
     pool.connect(function(err, client, done) {
       if (err) {
         console.error("Waiting for db: ", err);

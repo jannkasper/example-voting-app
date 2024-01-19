@@ -12,8 +12,10 @@ namespace Worker
 {
     public class Program
     {
-        public static string dbConnection = "Server=vote-db.postgres.database.azure.com;Database=postgres;Port=5432;User Id=user;Password=Password123!;Ssl Mode=Require;";
-        public static string redisConnection = "vote-redis-jan.redis.cache.windows.net:6380,password=FfWoGGYxaULbziUMg9GQLYFdFZiqOTii5AzCaCCPapY=,ssl=True,abortConnect=False";
+        public static string dbConnection = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION");
+        public static string redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+//        public static string dbConnection = "Server=vote-app.postgres.database.azure.com;Database=postgres;Port=5432;User Id=user;Password=Password123!;Ssl Mode=Require;";
+//        public static string redisConnection = "vote-redis-pt.redis.cache.windows.net:6380,password=kj7mZ2vc73SNxSAG9gcpFp7cg9cPTAqQhAzCaETtoGQ=,ssl=True,abortConnect=False";
         public static int Main(string[] args)
         {
             try
@@ -77,6 +79,7 @@ namespace Worker
             {
                 try
                 {
+                    Console.WriteLine($"Postgres connect: '{connectionString}'");
                     connection = new NpgsqlConnection(connectionString);
                     connection.Open();
                     break;
@@ -116,6 +119,7 @@ namespace Worker
                 try
                 {
                     Console.Error.WriteLine("Connecting to redis");
+                    Console.WriteLine($"Redis connect: '{hostname}'");
                     return ConnectionMultiplexer.Connect(hostname);
                 }
                 catch (RedisConnectionException)

@@ -9,16 +9,20 @@ import logging
 option_a = os.getenv('OPTION_A', "Cats")
 option_b = os.getenv('OPTION_B', "Dogs")
 hostname = socket.gethostname()
+redis_host = os.environ['REDIS_HOST'] or 'localhost'
+redis_port = os.environ['REDIS_PORT'] or 6379
+redis_password = os.environ['REDIS_PASSWORD'] or 'password'
 
 app = Flask(__name__)
 
 gunicorn_error_logger = logging.getLogger('gunicorn.error')
+gunicorn_error_logger.info('Connecting to redis host: %s port: %s password: %s', redis_host, redis_port, redis_password)
 app.logger.handlers.extend(gunicorn_error_logger.handlers)
 app.logger.setLevel(logging.INFO)
 
 def get_redis():
     if not hasattr(g, 'redis'):
-        g.redis = Redis(host="vote-redis-jan.redis.cache.windows.net", port=6379, db=0, password='FfWoGGYxaULbziUMg9GQLYFdFZiqOTii5AzCaCCPapY=', socket_timeout=20)
+        g.redis = Redis(host=redis_host, port=redis_port, db=0, password=redis_password, socket_timeout=20)
     return g.redis
 
 @app.route("/", methods=['POST','GET'])
